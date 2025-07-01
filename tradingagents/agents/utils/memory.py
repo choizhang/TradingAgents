@@ -1,25 +1,62 @@
 import chromadb
 from chromadb.config import Settings
 from openai import OpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
+import httpx
 
 
 class FinancialSituationMemory:
     def __init__(self, name, config):
-        if config["backend_url"] == "http://localhost:11434/v1":
-            self.embedding = "nomic-embed-text"
-        else:
-            self.embedding = "text-embedding-3-small"
-        self.client = OpenAI(base_url=config["backend_url"])
+        self.config = config
+        self.llm_provider = config.get("llm_provider", "openai").lower()
+        self.backend_url = config.get("backend_url")
+        self.proxies = config.get("proxies")
+        self.llm_timeout = config.get("llm_timeout")
+
+        if self.llm_provider == "google":
+            self.embedding_model = "gemini-embedding-exp-03-07"
+            # For Google embeddings, we use the direct google.generativeai client
+            import google.generativeai as genai
+            genai.configure(api_key=self.config.get("google_api_key"))
+            # If proxies are set, rely on environment variables for genai to pick them up
+            # as genai client doesn't directly take httpx.Client or proxies parameter.
+            self.client = genai # Assign the genai module as the client
+            self.get_embedding_func = self._get_google_embedding
+        else: # Default to OpenAI or other compatible
+            if self.backend_url == "http://localhost:11434/v1":
+                self.embedding_model = "nomic-embed-text"
+            else:
+                self.embedding_model = "text-embedding-3-small"
+            
+            if self.proxies:
+                self.client = OpenAI(base_url=self.backend_url, http_client=httpx.Client(proxies=self.proxies))
+            else:
+                self.client = OpenAI(base_url=self.backend_url)
+            self.get_embedding_func = self._get_openai_embedding
+            
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.situation_collection = self.chroma_client.create_collection(name=name)
 
-    def get_embedding(self, text):
+    def _get_openai_embedding(self, text):
         """Get OpenAI embedding for a text"""
-        
         response = self.client.embeddings.create(
-            model=self.embedding, input=text
+            model=self.embedding_model, input=text
         )
         return response.data[0].embedding
+
+    def _get_google_embedding(self, text):
+        """Get Google embedding for a text"""
+        # Use google.generativeai.embed_content directly
+        response = self.client.embed_content(
+            model=self.embedding_model,
+            content=text,
+            task_type="RETRIEVAL_DOCUMENT"
+        )
+        return response['embedding']
+
+    def get_embedding(self, text):
+        """Get embedding for a text using the selected client"""
+        return self.get_embedding_func(text)
 
     def add_situations(self, situations_and_advice):
         """Add financial situations and their corresponding advice. Parameter is a list of tuples (situation, rec)"""

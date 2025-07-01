@@ -16,7 +16,11 @@ def create_bear_researcher(llm, memory):
         fundamentals_report = state["fundamentals_report"]
 
         curr_situation = f"{market_research_report}\n\n{sentiment_report}\n\n{news_report}\n\n{fundamentals_report}"
-        past_memories = memory.get_memories(curr_situation, n_matches=2)
+        # Truncate curr_situation to avoid exceeding embedding model's payload limit
+        max_payload_size = 1000  # Limit to 1000 characters
+        if len(curr_situation) > max_payload_size:
+            curr_situation = curr_situation[:max_payload_size] + "..."
+        past_memories = memory.get_memories(curr_situation, n_matches=1)
 
         past_memory_str = ""
         for i, rec in enumerate(past_memories, 1):

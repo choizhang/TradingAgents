@@ -10,6 +10,7 @@ import pandas as pd
 import os
 from dateutil.relativedelta import relativedelta
 from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 import tradingagents.dataflows.interface as interface
 from tradingagents.default_config import DEFAULT_CONFIG
 from langchain_core.messages import HumanMessage
@@ -61,7 +62,7 @@ class Toolkit:
             str: A formatted dataframe containing the latest global news from Reddit in the specified time frame.
         """
         
-        global_news_result = interface.get_reddit_global_news(curr_date, 7, 5)
+        global_news_result = interface.get_reddit_global_news(curr_date, 3, 2)
 
         return global_news_result
 
@@ -115,7 +116,7 @@ class Toolkit:
             str: A formatted dataframe containing the latest news about the company on the given date
         """
 
-        stock_news_results = interface.get_reddit_company_news(ticker, curr_date, 7, 5)
+        stock_news_results = interface.get_reddit_company_news(ticker, curr_date, 3, 2)
 
         return stock_news_results
 
@@ -357,18 +358,18 @@ class Toolkit:
             str: A formatted string containing the latest news from Google News based on the query and date range.
         """
 
-        google_news_results = interface.get_google_news(query, curr_date, 7)
+        google_news_results = interface.get_google_news(query, curr_date, 3)
 
         return google_news_results
 
     @staticmethod
     @tool
-    def get_stock_news_openai(
+    def get_stock_news_llm(
         ticker: Annotated[str, "the company's ticker"],
         curr_date: Annotated[str, "Current date in yyyy-mm-dd format"],
     ):
         """
-        Retrieve the latest news about a given stock by using OpenAI's news API.
+        Retrieve the latest news about a given stock by using the configured LLM's news API.
         Args:
             ticker (str): Ticker of a company. e.g. AAPL, TSM
             curr_date (str): Current date in yyyy-mm-dd format
@@ -376,35 +377,35 @@ class Toolkit:
             str: A formatted string containing the latest news about the company on the given date.
         """
 
-        openai_news_results = interface.get_stock_news_openai(ticker, curr_date)
+        llm_news_results = interface.get_stock_news_llm(ticker, curr_date)
 
-        return openai_news_results
+        return llm_news_results
 
     @staticmethod
     @tool
-    def get_global_news_openai(
+    def get_global_news_llm(
         curr_date: Annotated[str, "Current date in yyyy-mm-dd format"],
     ):
         """
-        Retrieve the latest macroeconomics news on a given date using OpenAI's macroeconomics news API.
+        Retrieve the latest macroeconomics news on a given date using the configured LLM's macroeconomics news API.
         Args:
             curr_date (str): Current date in yyyy-mm-dd format
         Returns:
             str: A formatted string containing the latest macroeconomic news on the given date.
         """
 
-        openai_news_results = interface.get_global_news_openai(curr_date)
+        llm_news_results = interface.get_global_news_llm(curr_date)
 
-        return openai_news_results
+        return llm_news_results
 
     @staticmethod
     @tool
-    def get_fundamentals_openai(
+    def get_fundamentals_llm(
         ticker: Annotated[str, "the company's ticker"],
         curr_date: Annotated[str, "Current date in yyyy-mm-dd format"],
     ):
         """
-        Retrieve the latest fundamental information about a given stock on a given date by using OpenAI's news API.
+        Retrieve the latest fundamental information about a given stock on a given date by using the configured LLM's news API.
         Args:
             ticker (str): Ticker of a company. e.g. AAPL, TSM
             curr_date (str): Current date in yyyy-mm-dd format
@@ -412,8 +413,71 @@ class Toolkit:
             str: A formatted string containing the latest fundamental information about the company on the given date.
         """
 
-        openai_fundamentals_results = interface.get_fundamentals_openai(
+        llm_fundamentals_results = interface.get_fundamentals_llm(
             ticker, curr_date
         )
 
-        return openai_fundamentals_results
+        return llm_fundamentals_results
+
+    @staticmethod
+    @tool
+    def summarize_text(
+        text: Annotated[str, "The text to summarize"],
+        max_length: Annotated[int, "Maximum length of the summary in characters"] = 1500,
+    ) -> str:
+        """
+        Summarizes a given text to a specified maximum length.
+        Args:
+            text (str): The text content to be summarized.
+            max_length (int): The maximum desired length of the summary in characters.
+        Returns:
+            str: The summarized text.
+        """
+        config = Toolkit._config  # Access class-level config
+        llm_provider = config["llm_provider"].lower()
+        backend_url = config["backend_url"]
+        quick_think_llm = config["quick_think_llm"]
+        llm_timeout = config.get("llm_timeout")
+        proxies = config.get("proxies")
+
+        prompt_text = f"Summarize the following text concisely, keeping it under {max_length} characters:\n\n{text}"
+
+        if llm_provider == "google":
+            client = ChatGoogleGenerativeAI(model=quick_think_llm, timeout=llm_timeout)
+            response = client.invoke(prompt_text)
+            summary = response.content
+        elif llm_provider == "openai" or llm_provider == "ollama" or llm_provider == "openrouter":
+            if proxies:
+                client = OpenAI(base_url=backend_url, http_client=httpx.Client(proxies=proxies))
+            else:
+                client = OpenAI(base_url=backend_url)
+            
+            response = client.responses.create(
+                model=quick_think_llm,
+                input=[
+                    {
+                        "role": "system",
+                        "content": [
+                            {
+                                "type": "input_text",
+                                "text": prompt_text,
+                            }
+                        ],
+                    }
+                ],
+                text={"format": {"type": "text"}},
+                reasoning={},
+                temperature=0.7,
+                max_output_tokens=max_length, # Use max_length for output tokens
+                top_p=1,
+                store=True,
+            )
+            summary = response.output[1].content[0].text
+        else:
+            raise ValueError(f"Unsupported LLM provider for summarization: {llm_provider}")
+        
+        # Ensure the summary does not exceed max_length
+        if len(summary) > max_length:
+            summary = summary[:max_length] + "..."
+            
+        return summary

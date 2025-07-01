@@ -8,6 +8,10 @@ DEFAULT_CONFIG = {
         os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
         "dataflows/data_cache",
     ),
+    # API Keys (will be overridden by environment variables if set)
+    "finnhub_api_key": None,
+    "openai_api_key": None,
+    "google_api_key": None,
     # LLM settings
     "llm_provider": "openai",
     "deep_think_llm": "o4-mini",
@@ -17,6 +21,10 @@ DEFAULT_CONFIG = {
     "max_debate_rounds": 1,
     "max_risk_discuss_rounds": 1,
     "max_recur_limit": 100,
+    # LLM Timeout
+    "llm_timeout": 1200, # Default to 20 minutes
     # Tool settings
     "online_tools": True,
+    # Proxy settings
+    "proxies": None, # Can be a dictionary like {"http": "http://proxy.example.com", "https": "http://proxy.example.com"}
 }

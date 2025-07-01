@@ -9,12 +9,13 @@ def create_news_analyst(llm, toolkit):
         ticker = state["company_of_interest"]
 
         if toolkit.config["online_tools"]:
-            tools = [toolkit.get_global_news_openai, toolkit.get_google_news]
+            tools = [toolkit.get_global_news_llm, toolkit.get_google_news, toolkit.summarize_text] # Add summarize_text tool
         else:
             tools = [
                 toolkit.get_finnhub_news,
                 toolkit.get_reddit_news,
                 toolkit.get_google_news,
+                toolkit.summarize_text, # Add summarize_text tool
             ]
 
         system_message = (
@@ -50,7 +51,18 @@ def create_news_analyst(llm, toolkit):
         report = ""
 
         if len(result.tool_calls) == 0:
-            report = result.content
+            if isinstance(result.content, list):
+                report = "\n".join(result.content)
+            else:
+                report = result.content
+        
+        # Summarize the report before returning
+        summarized_report = toolkit.summarize_text(report) # Summarize to 1500 characters
+
+        return {
+            "messages": [result],
+            "news_report": summarized_report,
+        }
 
         return {
             "messages": [result],

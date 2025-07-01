@@ -10,7 +10,7 @@ def create_fundamentals_analyst(llm, toolkit):
         company_name = state["company_of_interest"]
 
         if toolkit.config["online_tools"]:
-            tools = [toolkit.get_fundamentals_openai]
+            tools = [toolkit.get_fundamentals_llm, toolkit.summarize_text] # Add summarize_text tool
         else:
             tools = [
                 toolkit.get_finnhub_company_insider_sentiment,
@@ -18,6 +18,7 @@ def create_fundamentals_analyst(llm, toolkit):
                 toolkit.get_simfin_balance_sheet,
                 toolkit.get_simfin_cashflow,
                 toolkit.get_simfin_income_stmt,
+                toolkit.summarize_text, # Add summarize_text tool
             ]
 
         system_message = (
@@ -54,7 +55,18 @@ def create_fundamentals_analyst(llm, toolkit):
         report = ""
 
         if len(result.tool_calls) == 0:
-            report = result.content
+            if isinstance(result.content, list):
+                report = "\n".join(result.content)
+            else:
+                report = result.content
+        
+        # Summarize the report before returning
+        summarized_report = toolkit.summarize_text(report) # Summarize to 1500 characters
+
+        return {
+            "messages": [result],
+            "fundamentals_report": summarized_report,
+        }
 
         return {
             "messages": [result],

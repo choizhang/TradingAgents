@@ -211,3 +211,9 @@ Please reference our work if you find *TradingAgents* provides you with some hel
       url={https://arxiv.org/abs/2412.20138}, 
 }
 ```
+
+
+1. 采用python 3.11, 3.13由于比较新，有些库都还没编译互相依赖一直报错
+2. 增加gemini的支持，代码中硬编码了openai。比如在embedding, market等中，建议使用AI工具全局替换处理
+3. embedding的上下文基本最大才32k，但在多空激变时，会因为数据量过大而报错。所以增加了对大内容总结的支持
+4. 在市场分析通过system_prompt将start_day设置为1个月，新闻查找前3天，相关度召回从2改为1。

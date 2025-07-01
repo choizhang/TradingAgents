@@ -13,6 +13,7 @@ import pandas as pd
 from tqdm import tqdm
 import yfinance as yf
 from openai import OpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from .config import get_config, set_config, DATA_DIR
 
 
@@ -702,106 +703,161 @@ def get_YFin_data(
     return filtered_data
 
 
-def get_stock_news_openai(ticker, curr_date):
+def get_stock_news_llm(ticker, curr_date):
     config = get_config()
-    client = OpenAI(base_url=config["backend_url"])
+    llm_provider = config["llm_provider"].lower()
+    backend_url = config["backend_url"]
+    quick_think_llm = config["quick_think_llm"]
+    llm_timeout = config.get("llm_timeout")
+    proxies = config.get("proxies")
 
-    response = client.responses.create(
-        model=config["quick_think_llm"],
-        input=[
-            {
-                "role": "system",
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": f"Can you search Social Media for {ticker} from 7 days before {curr_date} to {curr_date}? Make sure you only get the data posted during that period.",
-                    }
-                ],
-            }
-        ],
-        text={"format": {"type": "text"}},
-        reasoning={},
-        tools=[
-            {
-                "type": "web_search_preview",
-                "user_location": {"type": "approximate"},
-                "search_context_size": "low",
-            }
-        ],
-        temperature=1,
-        max_output_tokens=4096,
-        top_p=1,
-        store=True,
-    )
+    prompt_text = f"Can you search Social Media for {ticker} from 7 days before {curr_date} to {curr_date}? Make sure you only get the data posted during that period."
 
-    return response.output[1].content[0].text
+    if llm_provider == "google":
+        client = ChatGoogleGenerativeAI(model=quick_think_llm, timeout=llm_timeout)
+        # Google Generative AI does not have a direct "responses.create" with tools like OpenAI
+        # For web search, it typically relies on integrated search capabilities or external tools.
+        # Assuming the underlying LangChain integration handles the tool calling.
+        # If not, this part would need a more direct call to Google Search API or a custom tool.
+        response = client.invoke(prompt_text)
+        return response.content
+    elif llm_provider == "openai" or llm_provider == "ollama" or llm_provider == "openrouter":
+        if proxies:
+            client = OpenAI(base_url=backend_url, http_client=httpx.Client(proxies=proxies))
+        else:
+            client = OpenAI(base_url=backend_url)
+        
+        response = client.responses.create(
+            model=quick_think_llm,
+            input=[
+                {
+                    "role": "system",
+                    "content": [
+                        {
+                            "type": "input_text",
+                            "text": prompt_text,
+                        }
+                    ],
+                }
+            ],
+            text={"format": {"type": "text"}},
+            reasoning={},
+            tools=[
+                {
+                    "type": "web_search_preview",
+                    "user_location": {"type": "approximate"},
+                    "search_context_size": "low",
+                }
+            ],
+            temperature=1,
+            max_output_tokens=4096,
+            top_p=1,
+            store=True,
+        )
+        return response.output[1].content[0].text
+    else:
+        raise ValueError(f"Unsupported LLM provider for news search: {llm_provider}")
 
 
-def get_global_news_openai(curr_date):
+def get_global_news_llm(curr_date):
     config = get_config()
-    client = OpenAI(base_url=config["backend_url"])
+    llm_provider = config["llm_provider"].lower()
+    backend_url = config["backend_url"]
+    quick_think_llm = config["quick_think_llm"]
+    llm_timeout = config.get("llm_timeout")
+    proxies = config.get("proxies")
 
-    response = client.responses.create(
-        model=config["quick_think_llm"],
-        input=[
-            {
-                "role": "system",
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": f"Can you search global or macroeconomics news from 7 days before {curr_date} to {curr_date} that would be informative for trading purposes? Make sure you only get the data posted during that period.",
-                    }
-                ],
-            }
-        ],
-        text={"format": {"type": "text"}},
-        reasoning={},
-        tools=[
-            {
-                "type": "web_search_preview",
-                "user_location": {"type": "approximate"},
-                "search_context_size": "low",
-            }
-        ],
-        temperature=1,
-        max_output_tokens=4096,
-        top_p=1,
-        store=True,
-    )
+    prompt_text = f"Can you search global or macroeconomics news from 7 days before {curr_date} to {curr_date} that would be informative for trading purposes? Make sure you only get the data posted during that period."
 
-    return response.output[1].content[0].text
+    if llm_provider == "google":
+        client = ChatGoogleGenerativeAI(model=quick_think_llm, timeout=llm_timeout)
+        response = client.invoke(prompt_text)
+        return response.content
+    elif llm_provider == "openai" or llm_provider == "ollama" or llm_provider == "openrouter":
+        if proxies:
+            client = OpenAI(base_url=backend_url, http_client=httpx.Client(proxies=proxies))
+        else:
+            client = OpenAI(base_url=backend_url)
+
+        response = client.responses.create(
+            model=quick_think_llm,
+            input=[
+                {
+                    "role": "system",
+                    "content": [
+                        {
+                            "type": "input_text",
+                            "text": prompt_text,
+                        }
+                    ],
+                }
+            ],
+            text={"format": {"type": "text"}},
+            reasoning={},
+            tools=[
+                {
+                    "type": "web_search_preview",
+                    "user_location": {"type": "approximate"},
+                    "search_context_size": "low",
+                }
+            ],
+            temperature=1,
+            max_output_tokens=4096,
+            top_p=1,
+            store=True,
+        )
+        return response.output[1].content[0].text
+    else:
+        raise ValueError(f"Unsupported LLM provider for global news search: {llm_provider}")
 
 
-def get_fundamentals_openai(ticker, curr_date):
+def get_fundamentals_llm(ticker, curr_date):
     config = get_config()
-    client = OpenAI(base_url=config["backend_url"])
+    llm_provider = config["llm_provider"].lower()
+    backend_url = config["backend_url"]
+    quick_think_llm = config["quick_think_llm"]
+    llm_timeout = config.get("llm_timeout")
+    proxies = config.get("proxies")
 
-    response = client.responses.create(
-        model=config["quick_think_llm"],
-        input=[
-            {
-                "role": "system",
-                "content": [
-                    {
-                        "type": "input_text",
-                        "text": f"Can you search Fundamental for discussions on {ticker} during of the month before {curr_date} to the month of {curr_date}. Make sure you only get the data posted during that period. List as a table, with PE/PS/Cash flow/ etc",
-                    }
-                ],
-            }
-        ],
-        text={"format": {"type": "text"}},
-        reasoning={},
-        tools=[
-            {
-                "type": "web_search_preview",
-                "user_location": {"type": "approximate"},
-                "search_context_size": "low",
-            }
-        ],
-        temperature=1,
-        max_output_tokens=4096,
-        top_p=1,
-        store=True,
-    )
+    prompt_text = f"Can you search Fundamental for discussions on {ticker} during of the month before {curr_date} to the month of {curr_date}. Make sure you only get the data posted during that period. List as a table, with PE/PS/Cash flow/ etc"
 
-    return response.output[1].content[0].text
+    if llm_provider == "google":
+        client = ChatGoogleGenerativeAI(model=quick_think_llm, timeout=llm_timeout)
+        response = client.invoke(prompt_text)
+        return response.content
+    elif llm_provider == "openai" or llm_provider == "ollama" or llm_provider == "openrouter":
+        if proxies:
+            client = OpenAI(base_url=backend_url, http_client=httpx.Client(proxies=proxies))
+        else:
+            client = OpenAI(base_url=backend_url)
+
+        response = client.responses.create(
+            model=quick_think_llm,
+            input=[
+                {
+                    "role": "system",
+                    "content": [
+                        {
+                            "type": "input_text",
+                            "text": prompt_text,
+                        }
+                    ],
+                }
+            ],
+            text={"format": {"type": "text"}},
+            reasoning={},
+            tools=[
+                {
+                    "type": "web_search_preview",
+                    "user_location": {"type": "approximate"},
+                    "search_context_size": "low",
+                }
+            ],
+            temperature=1,
+            max_output_tokens=4096,
+            top_p=1,
+            store=True,
+        )
+        return response.output[1].content[0].text
+    else:
+        raise ValueError(f"Unsupported LLM provider for fundamentals search: {llm_provider}")
