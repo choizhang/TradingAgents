@@ -1,0 +1,10 @@
+{
+  "mcp": {
+    "servers": {
+      "github.com/upstash/context7-mcp": {
+        "type": "http",
+        "url": "http://127.0.0.1:6277"
+      }
+    }
+  }
+}

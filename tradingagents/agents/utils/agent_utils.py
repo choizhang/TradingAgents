@@ -14,6 +14,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import tradingagents.dataflows.interface as interface
 from tradingagents.default_config import DEFAULT_CONFIG
 from langchain_core.messages import HumanMessage
+import httpx # Add httpx import for OpenAI client
 
 
 def create_msg_delete():
@@ -68,205 +69,90 @@ class Toolkit:
 
     @staticmethod
     @tool
-    def get_finnhub_news(
-        ticker: Annotated[
-            str,
-            "Search query of a company, e.g. 'AAPL, TSM, etc.",
-        ],
-        start_date: Annotated[str, "Start date in yyyy-mm-dd format"],
-        end_date: Annotated[str, "End date in yyyy-mm-dd format"],
-    ):
-        """
-        Retrieve the latest news about a given stock from Finnhub within a date range
-        Args:
-            ticker (str): Ticker of a company. e.g. AAPL, TSM
-            start_date (str): Start date in yyyy-mm-dd format
-            end_date (str): End date in yyyy-mm-dd format
-        Returns:
-            str: A formatted dataframe containing news about the company within the date range from start_date to end_date
-        """
-
-        end_date_str = end_date
-
-        end_date = datetime.strptime(end_date, "%Y-%m-%d")
-        start_date = datetime.strptime(start_date, "%Y-%m-%d")
-        look_back_days = (end_date - start_date).days
-
-        finnhub_news_result = interface.get_finnhub_news(
-            ticker, end_date_str, look_back_days
-        )
-
-        return finnhub_news_result
-
-    @staticmethod
-    @tool
-    def get_reddit_stock_info(
-        ticker: Annotated[
-            str,
-            "Ticker of a company. e.g. AAPL, TSM",
-        ],
+    def get_reddit_company_news(
+        symbol: Annotated[str, "The cryptocurrency symbol (e.g., 'BTC', 'ETH') or company ticker symbol (e.g., 'AAPL')"],
         curr_date: Annotated[str, "Current date you want to get news for"],
     ) -> str:
         """
-        Retrieve the latest news about a given stock from Reddit, given the current date.
+        Retrieve the latest news about a given cryptocurrency or company from Reddit, given the current date.
         Args:
-            ticker (str): Ticker of a company. e.g. AAPL, TSM
+            symbol (str): The cryptocurrency symbol or company ticker symbol.
             curr_date (str): current date in yyyy-mm-dd format to get news for
         Returns:
-            str: A formatted dataframe containing the latest news about the company on the given date
+            str: A formatted string containing the latest news about the cryptocurrency/company on the given date.
         """
+        # The interface.get_reddit_company_news function already handles the logic for crypto/company
+        news_results = interface.get_reddit_company_news(symbol, curr_date, 3, 2)
+        return news_results
 
-        stock_news_results = interface.get_reddit_company_news(ticker, curr_date, 3, 2)
-
-        return stock_news_results
 
     @staticmethod
     @tool
-    def get_YFin_data(
-        symbol: Annotated[str, "ticker symbol of the company"],
-        start_date: Annotated[str, "Start date in yyyy-mm-dd format"],
-        end_date: Annotated[str, "End date in yyyy-mm-dd format"],
-    ) -> str:
-        """
-        Retrieve the stock price data for a given ticker symbol from Yahoo Finance.
-        Args:
-            symbol (str): Ticker symbol of the company, e.g. AAPL, TSM
-            start_date (str): Start date in yyyy-mm-dd format
-            end_date (str): End date in yyyy-mm-dd format
-        Returns:
-            str: A formatted dataframe containing the stock price data for the specified ticker symbol in the specified date range.
-        """
-
-        result_data = interface.get_YFin_data(symbol, start_date, end_date)
-
-        return result_data
-
-    @staticmethod
-    @tool
-    def get_YFin_data_online(
-        symbol: Annotated[str, "ticker symbol of the company"],
-        start_date: Annotated[str, "Start date in yyyy-mm-dd format"],
-        end_date: Annotated[str, "End date in yyyy-mm-dd format"],
-    ) -> str:
-        """
-        Retrieve the stock price data for a given ticker symbol from Yahoo Finance.
-        Args:
-            symbol (str): Ticker symbol of the company, e.g. AAPL, TSM
-            start_date (str): Start date in yyyy-mm-dd format
-            end_date (str): End date in yyyy-mm-dd format
-        Returns:
-            str: A formatted dataframe containing the stock price data for the specified ticker symbol in the specified date range.
-        """
-
-        result_data = interface.get_YFin_data_online(symbol, start_date, end_date)
-
-        return result_data
-
-    @staticmethod
-    @tool
-    def get_stockstats_indicators_report(
-        symbol: Annotated[str, "ticker symbol of the company"],
-        indicator: Annotated[
-            str, "technical indicator to get the analysis and report of"
-        ],
-        curr_date: Annotated[
-            str, "The current trading date you are trading on, YYYY-mm-dd"
-        ],
+    def get_crypto_ohlcv_data_window(
+        exchange_id: Annotated[str, "The ID of the cryptocurrency exchange (e.g., 'binance', 'kraken')"] = "kraken",
+        symbol: Annotated[str, "The trading pair symbol (e.g., 'BTC/USDT', 'ETH/USD')"] = "BTC/USDT",
+        timeframe: Annotated[str, "The OHLCV timeframe (e.g., '1m', '5m', '1h', '1d')"] = "1d",
+        curr_date: Annotated[str, "Current date in yyyy-mm-dd format"] = datetime.now().strftime("%Y-%m-%d"),
         look_back_days: Annotated[int, "how many days to look back"] = 30,
     ) -> str:
         """
-        Retrieve stock stats indicators for a given ticker symbol and indicator.
-        Args:
-            symbol (str): Ticker symbol of the company, e.g. AAPL, TSM
-            indicator (str): Technical indicator to get the analysis and report of
-            curr_date (str): The current trading date you are trading on, YYYY-mm-dd
-            look_back_days (int): How many days to look back, default is 30
-        Returns:
-            str: A formatted dataframe containing the stock stats indicators for the specified ticker symbol and indicator.
+        Retrieve OHLCV data for a cryptocurrency pair within a time frame from local cache or online.
         """
-
-        result_stockstats = interface.get_stock_stats_indicators_window(
-            symbol, indicator, curr_date, look_back_days, False
-        )
-
-        return result_stockstats
+        return interface.get_crypto_ohlcv_data_window(exchange_id, symbol, timeframe, curr_date, look_back_days)
 
     @staticmethod
     @tool
-    def get_stockstats_indicators_report_online(
-        symbol: Annotated[str, "ticker symbol of the company"],
-        indicator: Annotated[
-            str, "technical indicator to get the analysis and report of"
-        ],
-        curr_date: Annotated[
-            str, "The current trading date you are trading on, YYYY-mm-dd"
-        ],
-        look_back_days: Annotated[int, "how many days to look back"] = 30,
+    def get_crypto_technical_indicators(
+        symbol: Annotated[str, "The cryptocurrency symbol (e.g., 'BTC', 'ETH')"],
+        curr_date: Annotated[str, "Current date in yyyy-mm-dd format"],
+        look_back_days: Annotated[int, "how many days to look back"],
     ) -> str:
         """
-        Retrieve stock stats indicators for a given ticker symbol and indicator.
-        Args:
-            symbol (str): Ticker symbol of the company, e.g. AAPL, TSM
-            indicator (str): Technical indicator to get the analysis and report of
-            curr_date (str): The current trading date you are trading on, YYYY-mm-dd
-            look_back_days (int): How many days to look back, default is 30
-        Returns:
-            str: A formatted dataframe containing the stock stats indicators for the specified ticker symbol and indicator.
+        Retrieve technical indicators for a given cryptocurrency.
         """
+        return interface.get_crypto_technical_indicators(symbol, curr_date, look_back_days)
 
-        result_stockstats = interface.get_stock_stats_indicators_window(
-            symbol, indicator, curr_date, look_back_days, True
-        )
-
-        return result_stockstats
 
     @staticmethod
     @tool
-    def get_finnhub_company_insider_sentiment(
-        ticker: Annotated[str, "ticker symbol for the company"],
-        curr_date: Annotated[
-            str,
-            "current date of you are trading at, yyyy-mm-dd",
-        ],
-    ):
+    def get_crypto_current_price(
+        exchange_id: Annotated[str, "The ID of the cryptocurrency exchange (e.g., 'binance', 'coinbasepro')"],
+        symbol: Annotated[str, "The trading pair symbol (e.g., 'BTC/USDT', 'ETH/USD')"],
+    ) -> str:
         """
-        Retrieve insider sentiment information about a company (retrieved from public SEC information) for the past 30 days
-        Args:
-            ticker (str): ticker symbol of the company
-            curr_date (str): current date you are trading at, yyyy-mm-dd
-        Returns:
-            str: a report of the sentiment in the past 30 days starting at curr_date
+        Retrieve the current price of a cryptocurrency pair.
         """
-
-        data_sentiment = interface.get_finnhub_company_insider_sentiment(
-            ticker, curr_date, 30
-        )
-
-        return data_sentiment
+        return interface.get_crypto_current_price(exchange_id, symbol)
 
     @staticmethod
     @tool
-    def get_finnhub_company_insider_transactions(
-        ticker: Annotated[str, "ticker symbol"],
-        curr_date: Annotated[
-            str,
-            "current date you are trading at, yyyy-mm-dd",
-        ],
-    ):
+    def get_crypto_order_book(
+        exchange_id: Annotated[str, "The ID of the cryptocurrency exchange (e.g., 'binance', 'coinbasepro')"],
+        symbol: Annotated[str, "The trading pair symbol (e.g., 'BTC/USDT', 'ETH/USD')"],
+        limit: Annotated[int, "Number of bids and asks to fetch"],
+    ) -> str:
         """
-        Retrieve insider transaction information about a company (retrieved from public SEC information) for the past 30 days
-        Args:
-            ticker (str): ticker symbol of the company
-            curr_date (str): current date you are trading at, yyyy-mm-dd
-        Returns:
-            str: a report of the company's insider transactions/trading information in the past 30 days
+        Retrieve the order book for a cryptocurrency pair.
         """
+        return interface.get_crypto_order_book(exchange_id, symbol, limit)
 
-        data_trans = interface.get_finnhub_company_insider_transactions(
-            ticker, curr_date, 30
-        )
+    @staticmethod
+    @tool
+    def get_blockchain_data(
+        blockchain_id: Annotated[str, "The ID of the blockchain (e.g., 'btc', 'eth')"],
+        data_type: Annotated[str, "Type of blockchain data (e.g., 'address_balance', 'transaction_count')"],
+        address: Annotated[str, "Blockchain address (if data_type is 'address_balance')"] = None,
+        curr_date: Annotated[str, "Current date in yyyy-mm-dd format"] = None,
+        look_back_days: Annotated[int, "how many days to look back"] = None,
+    ) -> str:
+        """
+        Fetches various types of blockchain data. This is a placeholder and needs
+        to be implemented with actual API calls to services like BlockCypher or Blockchain.com.
+        """
+        return interface.get_blockchain_data(blockchain_id, data_type, address, curr_date, look_back_days)
 
-        return data_trans
+
+
 
     @staticmethod
     @tool
@@ -365,16 +251,16 @@ class Toolkit:
     @staticmethod
     @tool
     def get_stock_news_llm(
-        ticker: Annotated[str, "the company's ticker"],
+        ticker: Annotated[str, "The cryptocurrency symbol (e.g., 'BTC', 'ETH')"], # Updated annotation
         curr_date: Annotated[str, "Current date in yyyy-mm-dd format"],
     ):
         """
-        Retrieve the latest news about a given stock by using the configured LLM's news API.
+        Retrieve the latest news about a given cryptocurrency by using the configured LLM's news API. # Updated description
         Args:
-            ticker (str): Ticker of a company. e.g. AAPL, TSM
+            ticker (str): Cryptocurrency symbol. e.g. BTC, ETH
             curr_date (str): Current date in yyyy-mm-dd format
         Returns:
-            str: A formatted string containing the latest news about the company on the given date.
+            str: A formatted string containing the latest news about the cryptocurrency on the given date.
         """
 
         llm_news_results = interface.get_stock_news_llm(ticker, curr_date)
@@ -401,16 +287,16 @@ class Toolkit:
     @staticmethod
     @tool
     def get_fundamentals_llm(
-        ticker: Annotated[str, "the company's ticker"],
+        ticker: Annotated[str, "The cryptocurrency symbol (e.g., 'BTC', 'ETH')"], # Updated annotation
         curr_date: Annotated[str, "Current date in yyyy-mm-dd format"],
     ):
         """
-        Retrieve the latest fundamental information about a given stock on a given date by using the configured LLM's news API.
+        Retrieve the latest fundamental information about a given cryptocurrency on a given date by using the configured LLM's API. # Updated description
         Args:
-            ticker (str): Ticker of a company. e.g. AAPL, TSM
+            ticker (str): Cryptocurrency symbol. e.g. BTC, ETH
             curr_date (str): Current date in yyyy-mm-dd format
         Returns:
-            str: A formatted string containing the latest fundamental information about the company on the given date.
+            str: A formatted string containing the latest fundamental information about the cryptocurrency on the given date.
         """
 
         llm_fundamentals_results = interface.get_fundamentals_llm(

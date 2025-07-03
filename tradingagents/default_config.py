@@ -3,9 +3,9 @@ import os
 DEFAULT_CONFIG = {
     "project_dir": os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
     "results_dir": os.getenv("TRADINGAGENTS_RESULTS_DIR", "./results"),
-    "data_dir": "/Users/yluo/Documents/Code/ScAI/FR1-data",
+    "data_dir": os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data")), # Set data_dir to a 'data' folder in the project root
     "data_cache_dir": os.path.join(
-        os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data")), # Use the new data_dir for cache
         "dataflows/data_cache",
     ),
     # API Keys (will be overridden by environment variables if set)
@@ -27,4 +27,6 @@ DEFAULT_CONFIG = {
     "online_tools": True,
     # Proxy settings
     "proxies": None, # Can be a dictionary like {"http": "http://proxy.example.com", "https": "http://proxy.example.com"}
+    # Crypto settings
+    "default_crypto_pair": "BTC/USDT", # Default cryptocurrency trading pair
 }

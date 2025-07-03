@@ -9,22 +9,40 @@ def create_fundamentals_analyst(llm, toolkit):
         ticker = state["company_of_interest"]
         company_name = state["company_of_interest"]
 
-        if toolkit.config["online_tools"]:
-            tools = [toolkit.get_fundamentals_llm, toolkit.summarize_text] # Add summarize_text tool
-        else:
-            tools = [
-                toolkit.get_finnhub_company_insider_sentiment,
-                toolkit.get_finnhub_company_insider_transactions,
-                toolkit.get_simfin_balance_sheet,
-                toolkit.get_simfin_cashflow,
-                toolkit.get_simfin_income_stmt,
-                toolkit.summarize_text, # Add summarize_text tool
-            ]
+        # Determine if the current symbol is a cryptocurrency
+        is_crypto = "/" in ticker or ticker.upper() in ["BTC", "ETH", "XRP", "LTC", "BCH"]
 
-        system_message = (
-            "你是一名研究员，负责分析过去一周内一家公司的基本面信息。请撰写一份关于公司基本面信息的综合报告，包括财务文件、公司简介、基本公司财务数据、公司财务历史、内部人情绪和内部人交易，以全面了解公司的基本面信息，从而为交易者提供参考。请务必包含尽可能多的细节。不要简单地说明趋势是混合的，提供详细和细致的分析和见解，以帮助交易者做出决策。"
-            + " 确保在报告末尾附加一个 Markdown 表格，以组织报告中的关键点，使其有条理且易于阅读。**所有输出内容必须严格使用简体中文。**",
-        )
+        if toolkit.config["online_tools"]:
+            tools = [
+                toolkit.get_crypto_ohlcv_data_window, # For basic price data, can be used for some "fundamental" context
+                toolkit.get_blockchain_data, # Placeholder for actual blockchain data
+                toolkit.summarize_text,
+            ]
+        else:
+            if is_crypto:
+                tools = [
+                    toolkit.get_crypto_ohlcv_data_window, # For basic price data, can be used for some "fundamental" context
+                    toolkit.get_blockchain_data, # Placeholder for actual blockchain data
+                    toolkit.summarize_text,
+                ]
+            else: # Fallback for traditional stocks if online_tools is False, but we are migrating to crypto
+                tools = [
+                    toolkit.get_crypto_ohlcv_data_window, # For basic price data, can be used for some "fundamental" context
+                    toolkit.get_blockchain_data, # Placeholder for actual blockchain data
+                    toolkit.summarize_text,
+                ]
+
+        if is_crypto:
+            system_message = (
+                "你是一名研究员，负责分析过去一周内一个加密货币项目的基本面信息。请撰写一份关于加密货币项目基本面信息的综合报告，包括项目白皮书、路线图、开发活动、链上数据、代币经济学、监管环境和社区情绪，以全面了解项目的基本面信息，从而为交易者提供参考。请务必包含尽可能多的细节。不要简单地说明趋势是混合的，提供详细和细致的分析和见解，以帮助交易者做出决策。"
+                + " 确保在报告末尾附加一个 Markdown 表格，以组织报告中的关键点，使其有条理且易于阅读。**所有输出内容必须严格使用简体中文。**"
+                + " 请注意：在获取加密货币数据时，请优先使用 'kraken' 交易所，而不是 'binance'。",
+            )
+        else:
+            system_message = (
+                "你是一名研究员，负责分析过去一周内一家公司的基本面信息。请撰写一份关于公司基本面信息的综合报告，包括财务文件、公司简介、基本公司财务数据、公司财务历史、内部人情绪和内部人交易，以全面了解公司的基本面信息，从而为交易者提供参考。请务必包含尽可能多的细节。不要简单地说明趋势是混合的，提供详细和细致的分析和见解，以帮助交易者做出决策。"
+                + " 确保在报告末尾附加一个 Markdown 表格，以组织报告中的关键点，使其有条理且易于阅读。**所有输出内容必须严格使用简体中文。**",
+            )
 
         prompt = ChatPromptTemplate.from_messages(
             [

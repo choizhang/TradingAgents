@@ -1,15 +1,15 @@
 import pandas as pd
-import yfinance as yf
 from stockstats import wrap
 from typing import Annotated
 import os
 from .config import get_config
+from datetime import datetime # Add datetime import for consistency
 
 
 class StockstatsUtils:
     @staticmethod
     def get_stock_stats(
-        symbol: Annotated[str, "ticker symbol for the company"],
+        symbol: Annotated[str, "The symbol (e.g., 'BTC/USDT', 'AAPL')"],
         indicator: Annotated[
             str, "quantitative indicators based off of the stock data for the company"
         ],
@@ -18,70 +18,69 @@ class StockstatsUtils:
         ],
         data_dir: Annotated[
             str,
-            "directory where the stock data is stored.",
+            "directory where the data is stored.",
         ],
         online: Annotated[
             bool,
             "whether to use online tools to fetch data or offline tools. If True, will use online tools.",
         ] = False,
     ):
+        from tradingagents.dataflows.interface import get_crypto_ohlcv_data_window # Import here to avoid circular dependency
+
         df = None
         data = None
+        is_crypto = "/" in symbol # Simple check for crypto symbol
 
-        if not online:
-            try:
-                data = pd.read_csv(
-                    os.path.join(
-                        data_dir,
-                        f"{symbol}-YFin-data-2015-01-01-2025-03-25.csv",
-                    )
-                )
-                df = wrap(data)
-            except FileNotFoundError:
-                raise Exception("Stockstats fail: Yahoo Finance data not fetched yet!")
-        else:
-            # Get today's date as YYYY-mm-dd to add to cache
-            today_date = pd.Timestamp.today()
-            curr_date = pd.to_datetime(curr_date)
-
-            end_date = today_date
-            start_date = today_date - pd.DateOffset(years=15)
-            start_date = start_date.strftime("%Y-%m-%d")
-            end_date = end_date.strftime("%Y-%m-%d")
-
-            # Get config and ensure cache directory exists
-            config = get_config()
-            os.makedirs(config["data_cache_dir"], exist_ok=True)
-
-            data_file = os.path.join(
-                config["data_cache_dir"],
-                f"{symbol}-YFin-data-{start_date}-{end_date}.csv",
+        if is_crypto:
+            # For cryptocurrency, fetch OHLCV data using crypto_utils
+            # Assuming '1d' timeframe for daily indicators, adjust as needed
+            ohlcv_df_str = get_crypto_ohlcv_data_window(
+                exchange_id="binance", # Default to binance, can be made configurable
+                symbol=symbol,
+                timeframe="1d",
+                curr_date=curr_date,
+                look_back_days=365 # Fetch enough data for indicators (e.g., 200-day SMA)
             )
+            if "No OHLCV data found" in ohlcv_df_str:
+                return ""
+            
+            try:
+                # Parse the string output back to DataFrame
+                df_lines = ohlcv_df_str.split('\n')
+                df_start_index = -1
+                for i, line in enumerate(df_lines):
+                    if line.strip().startswith('timestamp'):
+                        df_start_index = i
+                        break
+                
+                if df_start_index != -1:
+                    df_content = "\n".join(df_lines[df_start_index:])
+                    from io import StringIO
+                    data = pd.read_csv(StringIO(df_content), index_col='timestamp', parse_dates=True, sep=r'\s\s+', engine='python')
+                    data.columns = [col.lower() for col in data.columns] # Ensure lowercase column names
+                else:
+                    data = pd.DataFrame()
+            except Exception as e:
+                print(f"Error parsing crypto OHLCV data string in stockstats_utils: {e}")
+                data = pd.DataFrame()
 
-            if os.path.exists(data_file):
-                data = pd.read_csv(data_file)
-                data["Date"] = pd.to_datetime(data["Date"])
-            else:
-                data = yf.download(
-                    symbol,
-                    start=start_date,
-                    end=end_date,
-                    multi_level_index=False,
-                    progress=False,
-                    auto_adjust=True,
-                )
-                data = data.reset_index()
-                data.to_csv(data_file, index=False)
-
+            if data.empty:
+                return ""
+            
             df = wrap(data)
-            df["Date"] = df["Date"].dt.strftime("%Y-%m-%d")
-            curr_date = curr_date.strftime("%Y-%m-%d")
+            df["date"] = df.index.strftime("%Y-%m-%d") # Align column name for consistency
+            curr_date_dt = datetime.strptime(curr_date, "%Y-%m-%d")
+            curr_date_str = curr_date_dt.strftime("%Y-%m-%d")
 
         df[indicator]  # trigger stockstats to calculate the indicator
-        matching_rows = df[df["Date"].str.startswith(curr_date)]
+        
+        # Always use 'date' column for crypto
+        date_col = "date"
+        
+        matching_rows = df[df[date_col].str.startswith(curr_date_str)]
 
         if not matching_rows.empty:
             indicator_value = matching_rows[indicator].values[0]
             return indicator_value
         else:
-            return "N/A: Not a trading day (weekend or holiday)"
+            return "N/A: Not a trading day (weekend or holiday) or data not available"

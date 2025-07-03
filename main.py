@@ -9,16 +9,14 @@ config["deep_think_llm"] = "gemini-2.5-flash"  # Use a different model
 config["quick_think_llm"] = "gemini-2.5-flash"  # Use a different model
 config["max_debate_rounds"] = 1  # Increase debate rounds
 config["online_tools"] = True  # Enable online tools
-config["proxies"] = {
-    "http://": "http://127.0.0.1:7890",
-    "https://": "http://127.0.0.1:7890",
-} # Configure your proxy here if needed
 
 # Initialize with custom config
 ta = TradingAgentsGraph(debug=True, config=config)
 
 # forward propagate
-_, decision = ta.propagate("NVDA", "2025-07-03")
+print("Starting propagation...")
+_, decision = ta.propagate("BTC/USD", "2025-07-01")
+print("Propagation finished.")
 print(decision)
 
 # Memorize mistakes and reflect

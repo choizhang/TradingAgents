@@ -116,42 +116,26 @@ class TradingAgentsGraph:
         return {
             "market": ToolNode(
                 [
-                    # online tools
-                    self.toolkit.get_YFin_data_online,
-                    self.toolkit.get_stockstats_indicators_report_online,
-                    # offline tools
-                    self.toolkit.get_YFin_data,
-                    self.toolkit.get_stockstats_indicators_report,
+                    self.toolkit.get_crypto_technical_indicators, # Now supports both stock and crypto
+                    self.toolkit.get_crypto_ohlcv_data_window, # For crypto price data
                 ]
             ),
             "social": ToolNode(
                 [
-                    # online tools
-                    self.toolkit.get_stock_news_llm,
-                    # offline tools
-                    self.toolkit.get_reddit_stock_info,
+                    self.toolkit.get_reddit_company_news, # Use Reddit for social media sentiment
                 ]
             ),
             "news": ToolNode(
                 [
-                    # online tools
-                    self.toolkit.get_global_news_llm,
-                    self.toolkit.get_google_news,
-                    # offline tools
-                    self.toolkit.get_finnhub_news,
-                    self.toolkit.get_reddit_news,
+                    self.toolkit.get_google_news, # Use Google News for general news
+                    self.toolkit.get_reddit_news, # Use Reddit for global news
                 ]
             ),
             "fundamentals": ToolNode(
                 [
-                    # online tools
-                    self.toolkit.get_fundamentals_llm,
-                    # offline tools
-                    self.toolkit.get_finnhub_company_insider_sentiment,
-                    self.toolkit.get_finnhub_company_insider_transactions,
-                    self.toolkit.get_simfin_balance_sheet,
-                    self.toolkit.get_simfin_cashflow,
-                    self.toolkit.get_simfin_income_stmt,
+                    self.toolkit.get_fundamentals_llm, # LLM-driven fundamentals, adjusted for crypto
+                    self.toolkit.get_crypto_ohlcv_data_window, # Can provide some "fundamental" context for crypto
+                    self.toolkit.get_blockchain_data, # Placeholder for blockchain data
                 ]
             ),
         }

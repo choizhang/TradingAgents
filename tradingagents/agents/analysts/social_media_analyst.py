@@ -10,11 +10,11 @@ def create_social_media_analyst(llm, toolkit):
         company_name = state["company_of_interest"]
 
         if toolkit.config["online_tools"]:
-            tools = [toolkit.get_stock_news_llm, toolkit.summarize_text] # Add summarize_text tool
+            tools = [toolkit.get_reddit_company_news, toolkit.summarize_text]
         else:
             tools = [
-                toolkit.get_reddit_stock_info,
-                toolkit.summarize_text, # Add summarize_text tool
+                toolkit.get_reddit_company_news,
+                toolkit.summarize_text,
             ]
 
         system_message = (
@@ -62,11 +62,6 @@ def create_social_media_analyst(llm, toolkit):
         return {
             "messages": [result],
             "sentiment_report": summarized_report,
-        }
-
-        return {
-            "messages": [result],
-            "sentiment_report": report,
         }
 
     return social_media_analyst_node

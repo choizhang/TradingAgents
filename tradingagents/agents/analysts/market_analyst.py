@@ -10,21 +10,34 @@ def create_market_analyst(llm, toolkit):
         ticker = state["company_of_interest"]
         company_name = state["company_of_interest"]
 
-        if toolkit.config["online_tools"]:
-            tools = [
-                toolkit.get_YFin_data_online,
-                toolkit.get_stockstats_indicators_report_online,
-                toolkit.summarize_text, # Add summarize_text tool
-            ]
-        else:
-            tools = [
-                toolkit.get_YFin_data,
-                toolkit.get_stockstats_indicators_report,
-                toolkit.summarize_text, # Add summarize_text tool
-            ]
+        # Standardize ticker to a trading pair if it's a common crypto symbol
+        # Ensure ticker is in trading pair format for crypto
+        if "/" not in ticker:
+            # Assume USDT as default quote currency if not specified
+            ticker = f"{ticker.upper()}/USDT"
+        # Add more crypto symbols as needed
+
+        is_crypto = "/" in ticker # Now, only check for '/' to determine if it's a pair
+
+        # Always include crypto technical indicators and summarization
+        tools = [
+            toolkit.get_crypto_technical_indicators,
+            toolkit.summarize_text,
+        ]
+
+        # Add crypto OHLCV data if it's a crypto symbol
+        if is_crypto:
+            tools.insert(0, toolkit.get_crypto_ohlcv_data_window)
+
+        # Add news and social media tools, which are now crypto-aware
+        tools.append(toolkit.get_google_news)
+        tools.append(toolkit.get_reddit_company_news)
+        tools.append(toolkit.get_reddit_news)
+
 
         system_message = (
             """你是一名交易助手，负责分析金融市场。你的职责是从以下列表中选择与给定市场状况或交易策略最相关的指标。目标是选择最多 **8 个指标**，这些指标应提供互补的见解，避免冗余。类别和每个类别的指标如下：
+请注意：在获取加密货币数据时，请优先使用 'kraken' 交易所，而不是 'binance'。
 
 移动平均线：
 - close_50_sma: 50 简单移动平均线 (SMA)：中期趋势指标。用途：识别趋势方向并作为动态支撑/阻力。提示：它滞后于价格；与更快的指标结合使用以获得及时信号。
@@ -48,7 +61,7 @@ MACD 相关：
 成交量指标：
 - vwma: VWMA：按成交量加权的移动平均线。用途：通过将价格行为与成交量数据相结合来确认趋势。提示：注意成交量飙升导致的偏差结果；与其他成交量分析结合使用。
 
-- 选择提供多样化和互补信息的指标。避免冗余（例如，不要同时选择 rsi 和 stochrsi）。并简要解释它们为何适合给定的市场环境。在调用工具时，请使用上面提供的指标的确切名称，因为它们是已定义的参数，否则你的调用将失败。请务必首先调用 get_YFin_data 以检索生成指标所需的 CSV 文件。请撰写一份非常详细和细致的趋势报告。不要简单地说明趋势是混合的，提供详细和细致的分析和见解，以帮助交易者做出决策。确保你请求的是从当前日期起过去 1 个月的股票价格数据。"""
+- 选择提供多样化和互补信息的指标。避免冗余（例如，不要同时选择 rsi 和 stochrsi）。并简要解释它们为何适合给定的市场环境。请撰写一份非常详细和细致的趋势报告。不要简单地说明趋势是混合的，提供详细和细致的分析和见解，以帮助交易者做出决策。确保你请求的是从当前日期起过去 1 个月的市场价格数据。"""
             + """ 确保在报告末尾附加一个 Markdown 表格，以组织报告中的关键点，使其有条理且易于阅读。请用中文输出所有报告内容。"""
         )
 

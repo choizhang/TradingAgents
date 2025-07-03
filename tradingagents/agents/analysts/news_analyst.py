@@ -9,13 +9,13 @@ def create_news_analyst(llm, toolkit):
         ticker = state["company_of_interest"]
 
         if toolkit.config["online_tools"]:
-            tools = [toolkit.get_global_news_llm, toolkit.get_google_news, toolkit.summarize_text] # Add summarize_text tool
+            tools = [toolkit.get_google_news, toolkit.get_reddit_news, toolkit.summarize_text]
         else:
+            # Assuming offline tools would still use the local data fetching mechanisms
             tools = [
-                toolkit.get_finnhub_news,
-                toolkit.get_reddit_news,
                 toolkit.get_google_news,
-                toolkit.summarize_text, # Add summarize_text tool
+                toolkit.get_reddit_news,
+                toolkit.summarize_text,
             ]
 
         system_message = (
@@ -62,11 +62,6 @@ def create_news_analyst(llm, toolkit):
         return {
             "messages": [result],
             "news_report": summarized_report,
-        }
-
-        return {
-            "messages": [result],
-            "news_report": report,
         }
 
     return news_analyst_node

@@ -30,5 +30,6 @@ dependencies = [
     "tqdm>=4.67.1",
     "tushare>=1.4.21",
     "typing-extensions>=4.14.0",
+    "ccxt>=4.3.10",
     "yfinance>=0.2.63",
 ]
