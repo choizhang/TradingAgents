@@ -17,7 +17,6 @@
 *   `chromadb`：向量数据库
 *   `eodhd`：金融数据接口
 *   `feedparser`：RSS/Atom feed 解析
-*   `finnhub-python`：Finnhub API 客户端
 *   `langchain-anthropic`：Anthropic LLM 集成
 *   `langchain-experimental`：LangChain 实验性模块
 *   `langchain-google-genai`：Google Gemini LLM 集成
@@ -36,11 +35,11 @@
 *   `tqdm`：进度条
 *   `tushare`：金融数据接口
 *   `typing-extensions`：类型提示扩展
-*   `yfinance`：Yahoo Finance 数据接口
+*   `ccxt`：加密货币交易平台集成
 
 **开发设置与工具：**
 *   **虚拟环境：** 推荐使用 `conda` 或其他虚拟环境管理器。
-*   **API 密钥：** 需要配置 `FINNHUB_API_KEY` 和 `OPENAI_API_KEY` 环境变量。
+*   **API 密钥：** 需要配置 `OPENAI_API_KEY` 和 `GOOGLE_API_KEY` 环境变量。
 *   **CLI 工具：** 通过 `python -m cli.main` 运行。
 
 **技术约束与注意事项：**

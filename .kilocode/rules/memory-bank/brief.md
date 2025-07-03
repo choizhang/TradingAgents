@@ -18,4 +18,4 @@ TradingAgents 是一个多代理 LLM 金融交易框架，旨在模拟真实世�
 *   **框架：** LangGraph
 *   **LLM 集成：** 支持 OpenAI 和 Google Gemini 模型
 *   **数据存储：** ChromaDB (用于金融情景记忆)
-*   **数据源：** 集成 Finnhub, Google News, Reddit, Yahoo Finance, EODHD, Akshare, Tushare 等金融数据源。
+*   **数据源：** 集成 Google News, Reddit, EODHD, Akshare, Tushare 等金融数据源，并新增 CCXT 用于加密货币数据。

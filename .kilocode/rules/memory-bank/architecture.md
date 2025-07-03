@@ -33,6 +33,7 @@ TradingAgents 框架采用模块化和代理驱动的架构，旨在模拟真实
 *   `tradingagents/dataflows/stockstats_utils.py`：股票统计数据处理。
 *   `tradingagents/dataflows/yfin_utils.py`：Yahoo Finance 数据接口。
 *   `tradingagents/dataflows/interface.py`：数据流接口。
+*   `tradingagents/dataflows/crypto_utils.py`：加密货币数据接口。
 
 ### 3. 图处理层 (Graph)
 该层利用 LangGraph 构建代理之间的协作和决策流程。
