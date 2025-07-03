@@ -1,219 +1,199 @@
-<p align="center">
-  <img src="assets/TauricResearch.png" style="width: 60%; height: auto;">
-</p>
+# TradingAgents 记忆库总结
 
-<div align="center" style="line-height: 1;">
-  <a href="https://arxiv.org/abs/2412.20138" target="_blank"><img alt="arXiv" src="https://img.shields.io/badge/arXiv-2412.20138-B31B1B?logo=arxiv"/></a>
-  <a href="https://discord.com/invite/hk9PGKShPK" target="_blank"><img alt="Discord" src="https://img.shields.io/badge/Discord-TradingResearch-7289da?logo=discord&logoColor=white&color=7289da"/></a>
-  <a href="./assets/wechat.png" target="_blank"><img alt="WeChat" src="https://img.shields.io/badge/WeChat-TauricResearch-brightgreen?logo=wechat&logoColor=white"/></a>
-  <a href="https://x.com/TauricResearch" target="_blank"><img alt="X Follow" src="https://img.shields.io/badge/X-TauricResearch-white?logo=x&logoColor=white"/></a>
-  <br>
-  <a href="https://github.com/TauricResearch/" target="_blank"><img alt="Community" src="https://img.shields.io/badge/Join_GitHub_Community-TauricResearch-14C290?logo=discourse"/></a>
-</div>
+## TradingAgents 项目简述
 
-<div align="center">
-  <!-- Keep these links. Translations will automatically update with the README. -->
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=de">Deutsch</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=es">Español</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=fr">français</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ja">日本語</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ko">한국어</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=pt">Português</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ru">Русский</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=zh">中文</a>
-</div>
+TradingAgents 是一个多代理 LLM 金融交易框架，旨在模拟真实世界的交易公司。它通过部署由大型语言模型（LLM）驱动的专业代理（包括基本面分析师、情绪分析师、新闻分析师、技术分析师、研究员、交易员和风险管理团队），协作评估市场状况并制定交易决策。这些代理之间进行动态讨论，以确定最佳交易策略。
 
----
+**主要目标：**
+*   提供一个自动化、智能化的金融交易决策支持系统。
+*   通过多代理协作，实现对市场数据的全面分析和高效决策。
+*   解决传统交易决策中信息过载和人工分析效率低下的问题。
 
-# TradingAgents: Multi-Agents LLM Financial Trading Framework 
+**关键特性：**
+*   **多代理架构：** 包含分析师、研究员、交易员和风险管理团队等专业角色。
+*   **LLM 驱动：** 支持 OpenAI 和 Google Gemini 模型。
+*   **动态讨论：** 代理之间进行结构化辩论，以优化策略。
+*   **可扩展性：** 基于 LangGraph 构建，确保灵活性和模块化。
 
-> 🎉 **TradingAgents** officially released! We have received numerous inquiries about the work, and we would like to express our thanks for the enthusiasm in our community.
->
-> So we decided to fully open-source the framework. Looking forward to building impactful projects with you!
+**技术栈：**
+*   **核心语言：** Python
+*   **框架：** LangGraph
+*   **LLM 集成：** 支持 OpenAI 和 Google Gemini 模型
+*   **数据存储：** ChromaDB (用于金融情景记忆)
+*   **数据源：** 集成 Finnhub, Google News, Reddit, Yahoo Finance, EODHD, Akshare, Tushare 等金融数据源。
 
-<div align="center">
-<a href="https://www.star-history.com/#TauricResearch/TradingAgents&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=TauricResearch/TradingAgents&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=TauricResearch/TradingAgents&type=Date" />
-   <img alt="TradingAgents Star History" src="https://api.star-history.com/svg?repos=TauricResearch/TradingAgents&type=Date" style="width: 80%; height: auto;" />
- </picture>
-</a>
-</div>
+## TradingAgents 产品概述
 
-<div align="center">
+**项目存在的原因：**
+在快速变化的金融市场中，传统的人工交易决策面临信息过载、分析滞后和情绪干扰等挑战。TradingAgents 项目旨在通过引入先进的 LLM 驱动的多代理系统，解决这些痛点，提供更高效、更智能的交易决策支持。
 
-🚀 [TradingAgents](#tradingagents-framework) | ⚡ [Installation & CLI](#installation-and-cli) | 🎬 [Demo](https://www.youtube.com/watch?v=90gr5lwjIho) | 📦 [Package Usage](#tradingagents-package) | 🤝 [Contributing](#contributing) | 📄 [Citation](#citation)
+**解决的问题：**
+*   **信息处理效率低下：** 传统方法难以快速有效地处理海量的市场新闻、社交媒体情绪和财务数据。
+*   **决策偏差：** 人类交易员容易受到情绪和认知偏差的影响，导致非理性决策。
+*   **缺乏全面视角：** 单一分析师难以同时兼顾基本面、技术面、新闻和情绪等多维度信息。
+*   **策略优化不足：** 缺乏系统性的辩论和风险评估机制来持续优化交易策略。
 
-</div>
+**产品工作方式：**
+TradingAgents 模拟真实交易团队的运作模式，通过以下核心流程实现其功能：
+1.  **数据收集：** 从多个金融数据源（Finnhub, Google News, Reddit, Yahoo Finance, EODHD, Akshare, Tushare 等）实时或定期收集市场数据。
+2.  **多维度分析：**
+    *   **分析师团队：** 基本面分析师、情绪分析师、新闻分析师和技术分析师分别对各自领域的数据进行深入分析，生成专业报告。
+    *   **研究员团队：** 看涨和看跌研究员对分析师的报告进行批判性评估，并通过结构化辩论平衡潜在收益和固有风险。
+3.  **智能决策：**
+    *   **交易员代理：** 整合分析师和研究员的洞察，制定交易决策，包括交易时机和规模。
+    *   **风险管理团队：** 持续评估投资组合风险，调整交易策略，并向投资组合经理提供评估报告。
+    *   **投资组合经理：** 批准或拒绝交易提案，如果批准，则将订单发送到模拟交易所执行。
+4.  **记忆与学习：** 利用 ChromaDB 存储金融情景记忆，使系统能够从历史经验中学习并维护上下文。
 
-## TradingAgents Framework
+**用户体验目标：**
+*   **易于配置和使用：** 提供清晰的 CLI 界面和 Python 包接口，方便用户快速启动和自定义。
+*   **透明的决策过程：** 代理之间的讨论和报告生成过程清晰可见，帮助用户理解决策逻辑。
+*   **高效与可靠：** 自动化数据处理和决策流程，减少人工干预，提高交易效率和策略执行的可靠性。
+*   **可定制性：** 允许用户调整 LLM 模型、辩论轮次、数据源等配置，以适应不同的交易需求和风险偏好。
 
-TradingAgents is a multi-agent trading framework that mirrors the dynamics of real-world trading firms. By deploying specialized LLM-powered agents: from fundamental analysts, sentiment experts, and technical analysts, to trader, risk management team, the platform collaboratively evaluates market conditions and informs trading decisions. Moreover, these agents engage in dynamic discussions to pinpoint the optimal strategy.
+## TradingAgents 项目上下文
 
-<p align="center">
-  <img src="assets/schema.png" style="width: 100%; height: auto;">
-</p>
+**当前工作重点：**
+*   正在进行记忆库的初始化，以确保 Kilo Code 能够全面理解项目结构和功能。
 
-> TradingAgents framework is designed for research purposes. Trading performance may vary based on many factors, including the chosen backbone language models, model temperature, trading periods, the quality of data, and other non-deterministic factors. [It is not intended as financial, investment, or trading advice.](https://tauric.ai/disclaimer/)
+**最近的更改：**
+*   已创建或更新核心记忆库文件（`brief.md`, `product.md`）。
 
-Our framework decomposes complex trading tasks into specialized roles. This ensures the system achieves a robust, scalable approach to market analysis and decision-making.
+**活跃的决策和考虑事项：**
+*   确保记忆库文件准确反映项目的当前状态和未来方向。
+*   验证 LLM 模型和数据源配置的兼容性。
 
-### Analyst Team
-- Fundamentals Analyst: Evaluates company financials and performance metrics, identifying intrinsic values and potential red flags.
-- Sentiment Analyst: Analyzes social media and public sentiment using sentiment scoring algorithms to gauge short-term market mood.
-- News Analyst: Monitors global news and macroeconomic indicators, interpreting the impact of events on market conditions.
-- Technical Analyst: Utilizes technical indicators (like MACD and RSI) to detect trading patterns and forecast price movements.
+**下一步开发步骤：**
+*   继续生成并写入剩余的记忆库文件（`architecture.md`, `tech.md`）。
+*   完成记忆库初始化后，请求用户验证生成内容的准确性。
+*   根据用户反馈，对记忆库内容进行必要的调整和完善。
 
-<p align="center">
-  <img src="assets/analyst.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
+## TradingAgents 系统架构
 
-### Researcher Team
-- Comprises both bullish and bearish researchers who critically assess the insights provided by the Analyst Team. Through structured debates, they balance potential gains against inherent risks.
+TradingAgents 框架采用模块化和代理驱动的架构，旨在模拟真实世界的金融交易团队。其核心设计基于 LangGraph，以确保高度的灵活性和可扩展性。
 
-<p align="center">
-  <img src="assets/researcher.png" width="70%" style="display: inline-block; margin: 0 2%;">
-</p>
+### 核心组件
 
-### Trader Agent
-- Composes reports from the analysts and researchers to make informed trading decisions. It determines the timing and magnitude of trades based on comprehensive market insights.
+### 1. 代理层 (Agents)
+该层包含多个 LLM 驱动的代理，每个代理负责特定的金融分析和决策任务。
+*   **分析师团队 (`tradingagents/agents/analysts/`)：**
+    *   `fundamentals_analyst.py`：基本面分析。
+    *   `market_analyst.py`：市场分析。
+    *   `news_analyst.py`：新闻分析。
+    *   `social_media_analyst.py`：社交媒体情绪分析。
+*   **研究员团队 (`tradingagents/agents/researchers/`)：**
+    *   `bull_researcher.py`：看涨研究。
+    *   `bear_researcher.py`：看跌研究。
+    *   通过结构化辩论评估分析师报告。
+*   **交易员代理 (`tradingagents/agents/trader/trader.py`)：**
+    *   整合分析师和研究员的洞察，制定交易决策。
+*   **风险管理团队 (`tradingagents/agents/risk_mgmt/`)：**
+    *   `aggresive_debator.py`, `conservative_debator.py`, `neutral_debator.py`：评估投资组合风险，调整交易策略。
+*   **投资组合经理 (`tradingagents/agents/managers/research_manager.py`, `tradingagents/agents/managers/risk_manager.py`)：**
+    *   批准或拒绝交易提案，并发送订单到模拟交易所。
+*   **通用工具 (`tradingagents/agents/utils/`)：**
+    *   `memory.py`：使用 ChromaDB 存储金融情景记忆，支持 LLM 嵌入（OpenAI/Google）。
 
-<p align="center">
-  <img src="assets/trader.png" width="70%" style="display: inline-block; margin: 0 2%;">
-</p>
+### 2. 数据流层 (Dataflows)
+该层负责从各种金融数据源收集、处理和管理数据。
+*   `tradingagents/dataflows/config.py`：数据流配置。
+*   `tradingagents/dataflows/finnhub_utils.py`：Finnhub 数据接口。
+*   `tradingagents/dataflows/googlenews_utils.py`：Google News 数据接口。
+*   `tradingagents/dataflows/reddit_utils.py`：Reddit 数据接口。
+*   `tradingagents/dataflows/stockstats_utils.py`：股票统计数据处理。
+*   `tradingagents/dataflows/yfin_utils.py`：Yahoo Finance 数据接口。
+*   `tradingagents/dataflows/interface.py`：数据流接口。
 
-### Risk Management and Portfolio Manager
-- Continuously evaluates portfolio risk by assessing market volatility, liquidity, and other risk factors. The risk management team evaluates and adjusts trading strategies, providing assessment reports to the Portfolio Manager for final decision.
-- The Portfolio Manager approves/rejects the transaction proposal. If approved, the order will be sent to the simulated exchange and executed.
+### 3. 图处理层 (Graph)
+该层利用 LangGraph 构建代理之间的协作和决策流程。
+*   `tradingagents/graph/trading_graph.py`：定义核心交易图。
+*   `tradingagents/graph/conditional_logic.py`：条件逻辑处理。
+*   `tradingagents/graph/propagation.py`：信息传播机制。
+*   `tradingagents/graph/reflection.py`：代理反思机制。
+*   `tradingagents/graph/setup.py`：图设置。
+*   `tradingagents/graph/signal_processing.py`：信号处理。
 
-<p align="center">
-  <img src="assets/risk.png" width="70%" style="display: inline-block; margin: 0 2%;">
-</p>
+### 关键技术决策
+*   **LangGraph：** 作为核心编排框架，实现复杂的代理协作和工作流。
+*   **LLM 驱动：** 利用 OpenAI 和 Google Gemini 等 LLM 进行智能分析和决策。
+*   **ChromaDB：** 作为向量数据库，用于存储和检索金融情景记忆，支持上下文感知。
+*   **模块化设计：** 各个代理和数据流模块独立，易于扩展和维护。
 
-## Installation and CLI
+### 组件关系图
 
-### Installation
+```mermaid
+graph TD
+    A[数据源] --> B[数据流层];
+    B --> C[代理层];
+    C --> D[图处理层 (LangGraph)];
+    D -- 交易决策 --> E[模拟交易所];
+    C -- 记忆存储/检索 --> F[ChromaDB];
+    D -- 报告/洞察 --> G[用户/CLI];
 
-Clone TradingAgents:
-```bash
-git clone https://github.com/TauricResearch/TradingAgents.git
-cd TradingAgents
+    subgraph 代理层
+        C1[分析师团队]
+        C2[研究员团队]
+        C3[交易员代理]
+        C4[风险管理团队]
+        C5[投资组合经理]
+    end
+
+    C1 --> C2;
+    C2 --> C3;
+    C3 --> C4;
+    C4 --> C5;
+    C5 --> D;
+    C1 & C2 & C3 & C4 & C5 --> F;
 ```
 
-Create a virtual environment in any of your favorite environment managers:
-```bash
-conda create -n tradingagents python=3.13
-conda activate tradingagents
-```
+## TradingAgents 技术栈
 
-Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+**核心技术与框架：**
+*   **编程语言：** Python (要求 >=3.10)
+*   **LLM 编排框架：** LangGraph
+*   **大型语言模型 (LLM) 集成：**
+    *   OpenAI (通过 `langchain-openai`)
+    *   Google Gemini (通过 `langchain-google-genai`)
+    *   Anthropic (通过 `langchain-anthropic`)
+*   **向量数据库：** ChromaDB (用于金融情景记忆)
+*   **HTTP 客户端：** httpx (用于代理配置)
 
-### Required APIs
+**主要依赖库 (来自 `pyproject.toml`)：**
+*   `akshare`：金融数据接口
+*   `backtrader`：回测框架
+*   `chainlit`：CLI 界面和交互
+*   `chromadb`：向量数据库
+*   `eodhd`：金融数据接口
+*   `feedparser`：RSS/Atom feed 解析
+*   `finnhub-python`：Finnhub API 客户端
+*   `langchain-anthropic`：Anthropic LLM 集成
+*   `langchain-experimental`：LangChain 实验性模块
+*   `langchain-google-genai`：Google Gemini LLM 集成
+*   `langchain-openai`：OpenAI LLM 集成
+*   `langgraph`：LLM 编排框架
+*   `pandas`：数据处理和分析
+*   `parsel`：HTML/XML 解析
+*   `praw`：Reddit API 封装
+*   `pytz`：时区处理
+*   `questionary`：交互式命令行提示
+*   `redis`：内存数据结构存储
+*   `requests`：HTTP 请求库
+*   `rich`：富文本和终端美化
+*   `setuptools`：Python 包安装
+*   `stockstats`：股票统计数据计算
+*   `tqdm`：进度条
+*   `tushare`：金融数据接口
+*   `typing-extensions`：类型提示扩展
+*   `yfinance`：Yahoo Finance 数据接口
 
-You will also need the FinnHub API for financial data. All of our code is implemented with the free tier.
-```bash
-export FINNHUB_API_KEY=$YOUR_FINNHUB_API_KEY
-```
+**开发设置与工具：**
+*   **虚拟环境：** 推荐使用 `conda` 或其他虚拟环境管理器。
+*   **API 密钥：** 需要配置 `FINNHUB_API_KEY` 和 `OPENAI_API_KEY` 环境变量。
+*   **CLI 工具：** 通过 `python -m cli.main` 运行。
 
-You will need the OpenAI API for all the agents.
-```bash
-export OPENAI_API_KEY=$YOUR_OPENAI_API_KEY
-```
-
-### CLI Usage
-
-You can also try out the CLI directly by running:
-```bash
-python -m cli.main
-```
-You will see a screen where you can select your desired tickers, date, LLMs, research depth, etc.
-
-<p align="center">
-  <img src="assets/cli/cli_init.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
-
-An interface will appear showing results as they load, letting you track the agent's progress as it runs.
-
-<p align="center">
-  <img src="assets/cli/cli_news.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
-
-<p align="center">
-  <img src="assets/cli/cli_transaction.png" width="100%" style="display: inline-block; margin: 0 2%;">
-</p>
-
-## TradingAgents Package
-
-### Implementation Details
-
-We built TradingAgents with LangGraph to ensure flexibility and modularity. We utilize `o1-preview` and `gpt-4o` as our deep thinking and fast thinking LLMs for our experiments. However, for testing purposes, we recommend you use `o4-mini` and `gpt-4.1-mini` to save on costs as our framework makes **lots of** API calls.
-
-### Python Usage
-
-To use TradingAgents inside your code, you can import the `tradingagents` module and initialize a `TradingAgentsGraph()` object. The `.propagate()` function will return a decision. You can run `main.py`, here's also a quick example:
-
-```python
-from tradingagents.graph.trading_graph import TradingAgentsGraph
-from tradingagents.default_config import DEFAULT_CONFIG
-
-ta = TradingAgentsGraph(debug=True, config=DEFAULT_CONFIG.copy())
-
-# forward propagate
-_, decision = ta.propagate("NVDA", "2024-05-10")
-print(decision)
-```
-
-You can also adjust the default configuration to set your own choice of LLMs, debate rounds, etc.
-
-```python
-from tradingagents.graph.trading_graph import TradingAgentsGraph
-from tradingagents.default_config import DEFAULT_CONFIG
-
-# Create a custom config
-config = DEFAULT_CONFIG.copy()
-config["deep_think_llm"] = "gpt-4.1-nano"  # Use a different model
-config["quick_think_llm"] = "gpt-4.1-nano"  # Use a different model
-config["max_debate_rounds"] = 1  # Increase debate rounds
-config["online_tools"] = True # Use online tools or cached data
-
-# Initialize with custom config
-ta = TradingAgentsGraph(debug=True, config=config)
-
-# forward propagate
-_, decision = ta.propagate("NVDA", "2024-05-10")
-print(decision)
-```
-
-> For `online_tools`, we recommend enabling them for experimentation, as they provide access to real-time data. The agents' offline tools rely on cached data from our **Tauric TradingDB**, a curated dataset we use for backtesting. We're currently in the process of refining this dataset, and we plan to release it soon alongside our upcoming projects. Stay tuned!
-
-You can view the full list of configurations in `tradingagents/default_config.py`.
-
-## Contributing
-
-We welcome contributions from the community! Whether it's fixing a bug, improving documentation, or suggesting a new feature, your input helps make this project better. If you are interested in this line of research, please consider joining our open-source financial AI research community [Tauric Research](https://tauric.ai/).
-
-## Citation
-
-Please reference our work if you find *TradingAgents* provides you with some help :)
-
-```
-@misc{xiao2025tradingagentsmultiagentsllmfinancial,
-      title={TradingAgents: Multi-Agents LLM Financial Trading Framework}, 
-      author={Yijia Xiao and Edward Sun and Di Luo and Wei Wang},
-      year={2025},
-      eprint={2412.20138},
-      archivePrefix={arXiv},
-      primaryClass={q-fin.TR},
-      url={https://arxiv.org/abs/2412.20138}, 
-}
-```
-
-
-1. 采用python 3.11, 3.13由于比较新，有些库都还没编译互相依赖一直报错
-2. 增加gemini的支持，代码中硬编码了openai。比如在embedding, market等中，建议使用AI工具全局替换处理
-3. embedding的上下文基本最大才32k，但在多空激变时，会因为数据量过大而报错。所以增加了对大内容总结的支持
-4. 在市场分析通过system_prompt将start_day设置为1个月，新闻查找前3天，相关度召回从2改为1。
+**技术约束与注意事项：**
+*   推荐使用 Python 3.11，因为 3.13 版本可能存在库兼容性问题。
+*   LLM 模型选择：实验推荐使用 `o1-preview` 和 `gpt-4o` 进行深度思考和快速思考，测试推荐使用 `o4-mini` 和 `gpt-4.1-mini` 以节省成本。
+*   嵌入模型：`FinancialSituationMemory` 类中根据 LLM 提供商选择不同的嵌入模型（`gemini-embedding-exp-03-07` 或 `text-embedding-3-small`/`nomic-embed-text`）。
+*   上下文窗口管理：在多空激变等数据量过大时，可能需要对大内容进行总结以避免上下文溢出。
+*   市场分析配置：`system_prompt` 中 `start_day` 设置为 1 个月，新闻查找前 3 天，相关度召回从 2 改为 1。

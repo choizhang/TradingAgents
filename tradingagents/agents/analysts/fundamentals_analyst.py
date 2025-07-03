@@ -22,22 +22,22 @@ def create_fundamentals_analyst(llm, toolkit):
             ]
 
         system_message = (
-            "You are a researcher tasked with analyzing fundamental information over the past week about a company. Please write a comprehensive report of the company's fundamental information such as financial documents, company profile, basic company financials, company financial history, insider sentiment and insider transactions to gain a full view of the company's fundamental information to inform traders. Make sure to include as much detail as possible. Do not simply state the trends are mixed, provide detailed and finegrained analysis and insights that may help traders make decisions."
-            + " Make sure to append a Markdown table at the end of the report to organize key points in the report, organized and easy to read.",
+            "你是一名研究员，负责分析过去一周内一家公司的基本面信息。请撰写一份关于公司基本面信息的综合报告，包括财务文件、公司简介、基本公司财务数据、公司财务历史、内部人情绪和内部人交易，以全面了解公司的基本面信息，从而为交易者提供参考。请务必包含尽可能多的细节。不要简单地说明趋势是混合的，提供详细和细致的分析和见解，以帮助交易者做出决策。"
+            + " 确保在报告末尾附加一个 Markdown 表格，以组织报告中的关键点，使其有条理且易于阅读。**所有输出内容必须严格使用简体中文。**",
         )
 
         prompt = ChatPromptTemplate.from_messages(
             [
                 (
                     "system",
-                    "You are a helpful AI assistant, collaborating with other assistants."
-                    " Use the provided tools to progress towards answering the question."
-                    " If you are unable to fully answer, that's OK; another assistant with different tools"
-                    " will help where you left off. Execute what you can to make progress."
-                    " If you or any other assistant has the FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** or deliverable,"
-                    " prefix your response with FINAL TRANSACTION PROPOSAL: **BUY/HOLD/SELL** so the team knows to stop."
-                    " You have access to the following tools: {tool_names}.\n{system_message}"
-                    "For your reference, the current date is {current_date}. The company we want to look at is {ticker}",
+                    "你是一个乐于助人的AI助手，与其他助手协作。"
+                    " 使用提供的工具来回答问题。"
+                    " 如果你无法完全回答，没关系；另一个拥有不同工具的助手将从你离开的地方继续。"
+                    " 执行你能做的，以取得进展。"
+                    " 如果你或任何其他助手有最终交易提案：**买入/持有/卖出** 或可交付成果，"
+                    " 请在你的回复前加上“最终交易提案：**买入/持有/卖出**”，以便团队知道停止。"
+                    " 你可以使用以下工具：{tool_names}。\n{system_message}"
+                    "供你参考，当前日期是 {current_date}。我们想要查看的公司是 {ticker}",
                 ),
                 MessagesPlaceholder(variable_name="messages"),
             ]
@@ -66,11 +66,6 @@ def create_fundamentals_analyst(llm, toolkit):
         return {
             "messages": [result],
             "fundamentals_report": summarized_report,
-        }
-
-        return {
-            "messages": [result],
-            "fundamentals_report": report,
         }
 
     return fundamentals_analyst_node

@@ -819,7 +819,7 @@ def get_fundamentals_llm(ticker, curr_date):
     llm_timeout = config.get("llm_timeout")
     proxies = config.get("proxies")
 
-    prompt_text = f"Can you search Fundamental for discussions on {ticker} during of the month before {curr_date} to the month of {curr_date}. Make sure you only get the data posted during that period. List as a table, with PE/PS/Cash flow/ etc"
+    prompt_text = f"请根据你对 {ticker} 公司的了解，提供一份关于其基本面的概述或讨论。请用中文输出。请确保只提供截至 {curr_date} 的信息，不要提及未来数据。"
 
     if llm_provider == "google":
         client = ChatGoogleGenerativeAI(model=quick_think_llm, timeout=llm_timeout)

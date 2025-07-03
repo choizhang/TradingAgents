@@ -18,7 +18,7 @@ config["proxies"] = {
 ta = TradingAgentsGraph(debug=True, config=config)
 
 # forward propagate
-_, decision = ta.propagate("NVDA", "2025-06-23")
+_, decision = ta.propagate("NVDA", "2025-07-03")
 print(decision)
 
 # Memorize mistakes and reflect
